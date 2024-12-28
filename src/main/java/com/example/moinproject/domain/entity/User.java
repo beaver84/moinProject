@@ -1,18 +1,23 @@
 package com.example.moinproject.domain.entity;
 
 import com.example.moinproject.domain.enums.IdType;
+import com.example.moinproject.domain.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,6 +43,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quote> quotes = new ArrayList<>();
 
+    @Column
+    protected Roles accountRole;
+
     @Builder
     public User(String userId, String password, String idType, String idValue, String name, String phoneNumber) {
         this.userId = userId;
@@ -46,6 +54,7 @@ public class User {
         this.idValue = idValue;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.accountRole = Roles.USER;
     }
 
     public void addQuote(Quote quote) {
@@ -56,6 +65,20 @@ public class User {
     public void removeQuote(Quote quote) {
         quotes.remove(quote);
         quote.setUser(null);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (accountRole == Roles.ADMIN) {
+            return List.of(new SimpleGrantedAuthority("ADMIN"));
+        }else{
+            return List.of(new SimpleGrantedAuthority("USER"));
+        }
+    }
+
+    @Override
+    public String getUsername() {
+        return this.userId;
     }
 }
 
