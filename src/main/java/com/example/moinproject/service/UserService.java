@@ -1,11 +1,13 @@
 package com.example.moinproject.service;
 
+import com.example.moinproject.config.exception.CustomAuthenticationException;
 import com.example.moinproject.domain.dto.SignUpRequest;
 import com.example.moinproject.domain.dto.UserDto;
 import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,17 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return convertToDto(savedUser);
+    }
+
+    public User authenticateUser(String userId, String password) throws AuthenticationException {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomAuthenticationException("User not found"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new CustomAuthenticationException("Invalid password");
+        }
+
+        return user;
     }
 
     private void validateSignUpRequest(SignUpRequest request) {
