@@ -40,27 +40,6 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
-//    public String generateToken(String userId) {
-//        try {
-//            // 토큰 생성 로직
-//            Date now = new Date();
-//            Date expiryDate = new Date(now.getTime() + jwtExpiration);
-//
-//            return Jwts.builder()
-//                    .setSubject(userId)
-//                    .setIssuedAt(now)
-//                    .setExpiration(expiryDate)
-//                    .signWith(key)
-//                    .compact();
-//        } catch (NumberFormatException e) {
-//            log.error("JWT 만료 시간 파싱 중 오류 발생: ", e);
-//            throw new RuntimeException("JWT 만료 시간 설정이 올바르지 않습니다.", e);
-//        } catch (Exception e) {
-//            log.error("JWT 토큰 생성 중 오류 발생: ", e);
-//            throw new RuntimeException("JWT 토큰을 생성할 수 없습니다.", e);
-//        }
-//    }
-
     private Map<String, Object> createHeader() {
         Map<String, Object> header = new HashMap<>();
 
