@@ -1,4 +1,4 @@
-package com.example.moinproject.domain.dto;
+package com.example.moinproject.domain.dto.user;
 
 import com.example.moinproject.domain.enums.IdType;
 import jakarta.validation.constraints.Email;

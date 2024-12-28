@@ -1,4 +1,4 @@
-package com.example.moinproject.service;
+package com.example.moinproject.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

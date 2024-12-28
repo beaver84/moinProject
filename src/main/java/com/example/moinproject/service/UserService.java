@@ -1,19 +1,22 @@
 package com.example.moinproject.service;
 
 import com.example.moinproject.config.exception.CustomAuthenticationException;
-import com.example.moinproject.domain.dto.SignUpRequest;
-import com.example.moinproject.domain.dto.UserDto;
+import com.example.moinproject.domain.dto.user.SignUpRequest;
+import com.example.moinproject.domain.dto.user.UserDto;
 import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.UserRepository;
+import com.example.moinproject.util.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+@Transactional
 @Service
 public class UserService {
 

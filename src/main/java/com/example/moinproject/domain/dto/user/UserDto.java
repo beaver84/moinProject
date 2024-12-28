@@ -1,4 +1,4 @@
-package com.example.moinproject.domain.dto;
+package com.example.moinproject.domain.dto.user;
 
 import lombok.Data;
 

@@ -18,13 +18,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/user/**").permitAll()
+                        .requestMatchers("/transfer/**").permitAll()
                         .anyRequest().authenticated()
                 )
-//                .csrf(csrf -> csrf
-//                        .ignoringRequestMatchers("/h2-console/**")
-                .csrf(csrf -> csrf.disable()
-                )
-                .headers(headers -> headers.frameOptions().disable());
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.disable())
+                );
 
         return http.build();
     }
