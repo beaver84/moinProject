@@ -7,6 +7,7 @@ import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.UserRepository;
 import com.example.moinproject.util.EncryptionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,16 +19,12 @@ import java.util.regex.Pattern;
 
 @Transactional
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EncryptionService encryptionService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EncryptionService encryptionService;
 
     public UserDto signup(SignUpRequest request) {
         validateSignUpRequest(request);
@@ -36,13 +33,13 @@ public class UserService {
             throw new IllegalArgumentException("User already exists with this email");
         }
 
-        User user = new User();
-        user.setUserId(request.getUserId());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setIdType(String.valueOf(IdType.valueOf(String.valueOf(request.getIdType()))));
-        user.setIdValue(encryptionService.encrypt(request.getIdValue()));
-        user.setName(request.getName());
-        user.setPhoneNumber(request.getPhoneNumber());
+        User user = User.builder()
+                .userId(request.getUserId())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .idType(String.valueOf(IdType.valueOf(String.valueOf(request.getIdType()))))
+                .idValue(encryptionService.encrypt(request.getIdValue()))
+                .name(request.getName())
+                .phoneNumber(request.getPhoneNumber()).build();
 
         User savedUser = userRepository.save(user);
         return convertToDto(savedUser);
@@ -80,13 +77,13 @@ public class UserService {
     }
 
     private boolean isValidRegNo(String regNo) {
-        // Implement registration number validation logic
-        return true;
+        String regNoRegex = "\\d{6}[-]\\d{7}";
+        return Pattern.matches(regNoRegex, regNo);
     }
 
     private boolean isValidBusinessNo(String businessNo) {
-        // Implement business number validation logic
-        return true;
+        String businessNoRegex = "^\\d{3}-\\d{2}-\\d{5}$";
+        return Pattern.matches(businessNoRegex, businessNo);
     }
 
     private UserDto convertToDto(User user) {

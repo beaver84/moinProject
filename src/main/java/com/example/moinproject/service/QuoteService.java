@@ -5,6 +5,7 @@ import com.example.moinproject.domain.dto.transfer.QuoteRequest;
 import com.example.moinproject.domain.dto.transfer.QuoteResponse;
 import com.example.moinproject.repository.QuoteRepository;
 import com.example.moinproject.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +18,10 @@ import java.util.Currency;
 
 @Transactional
 @Service
+@RequiredArgsConstructor
 public class QuoteService {
     private final ExchangeRateService exchangeRateService;
     private final QuoteRepository quoteRepository;
-
-    public QuoteService(ExchangeRateService exchangeRateService, QuoteRepository quoteRepository) {
-        this.exchangeRateService = exchangeRateService;
-        this.quoteRepository = quoteRepository;
-    }
 
     public QuoteResponse createQuote(QuoteRequest request) {
         if (request.getAmount() <= 0) {
