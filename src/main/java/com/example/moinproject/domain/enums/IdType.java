@@ -1,5 +1,10 @@
-package com.example.moinproject.domain;
+package com.example.moinproject.domain.enums;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public enum IdType {
-    REG_NO, BUSINESS_NO
+    @JsonProperty("REG_NO")
+    REG_NO,
+    @JsonProperty("BUSINESS_NO")
+    BUSINESS_NO
 }

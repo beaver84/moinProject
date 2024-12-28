@@ -1,14 +1,14 @@
-package com.example.moinproject.domain;
+package com.example.moinproject.domain.entity;
 
+import com.example.moinproject.domain.enums.IdType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +21,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private IdType idType;
+    private String idType;
 
     @Column(nullable = false)
     private String idValue;
@@ -34,7 +33,7 @@ public class User {
     private String phoneNumber;
 
     @Builder
-    public User(String userId, String password, IdType idType, String idValue, String name, String phoneNumber) {
+    public User(String userId, String password, String idType, String idValue, String name, String phoneNumber) {
         this.userId = userId;
         this.password = password;
         this.idType = idType;
