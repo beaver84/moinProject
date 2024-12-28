@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.security.Key;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EncryptionService encryptionService;
+
+    private Key key;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -106,26 +109,7 @@ public class UserService {
         return dto;
     }
 
-    public User getUserFromJwt(String jwt) {
-        try {
-            // JWT 토큰에서 Claims 추출
-            String tokenWithoutBearer = jwt.replace("Bearer ", "");
 
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(tokenWithoutBearer)
-                    .getBody();
-
-            // Claims에서 userId 추출
-            String userId = claims.getSubject();
-
-            // userId로 사용자 조회
-            return userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new CustomAuthenticationException("User not found"));
-        } catch (Exception e) {
-            throw new CustomAuthenticationException("Invalid JWT token");
-        }
-    }
 
     public BigDecimal getDailyTransferAmount(User user) {
         Optional<User> userId = userRepository.findByUserId(user.getUserId());

@@ -36,6 +36,10 @@ dependencies {
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: '3.4.1'
 
+    implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.0'
+
+
+
 }
 
 tasks.named('test') {

@@ -21,9 +21,9 @@ public class TransferController {
     }
 
     @PostMapping("/quote")
-    public ResponseEntity<QuoteResponse> getQuote(@RequestBody QuoteRequest request) {
+    public ResponseEntity<QuoteResponse> getQuote(@RequestBody QuoteRequest request, @RequestHeader("Authorization") String jwt) {
         try {
-            QuoteResponse response = transferService.createQuote(request);
+            QuoteResponse response = transferService.createQuote(request, jwt);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             QuoteResponse errorResponse = new QuoteResponse();

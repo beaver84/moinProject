@@ -41,7 +41,7 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             User user = userService.authenticateUser(loginRequest.getUserId(), loginRequest.getPassword());
-            String token = jwtTokenProvider.generateToken(user.getUserId());
+            String token = jwtTokenProvider.generateToken(user);
 
             LoginResponse response = new LoginResponse();
             response.setResultCode(200);

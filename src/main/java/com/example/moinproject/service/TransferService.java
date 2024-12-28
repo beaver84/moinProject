@@ -1,5 +1,6 @@
 package com.example.moinproject.service;
 
+import com.example.moinproject.config.JwtTokenProvider;
 import com.example.moinproject.config.exception.DailyLimitExceededException;
 import com.example.moinproject.config.exception.QuoteExpiredException;
 import com.example.moinproject.domain.dto.transfer.TransferRequest;
@@ -11,6 +12,7 @@ import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.repository.QuoteRepository;
 import com.example.moinproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -30,11 +33,14 @@ public class TransferService {
     private final QuoteRepository quoteRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public QuoteResponse createQuote(QuoteRequest request) {
+    public QuoteResponse createQuote(QuoteRequest request, String jwt) {
         if (request.getAmount() <= 0) {
             throw new IllegalArgumentException("NEGATIVE_NUMBER");
         }
+
+        log.debug(jwt);
 
         BigDecimal basePrice = exchangeRateService.getBasePrice(request.getTargetCurrency()).block();
         Integer currencyUnit = exchangeRateService.getCurrencyUnit(request.getTargetCurrency()).block();
@@ -56,13 +62,18 @@ public class TransferService {
         quote.setExchangeRate(exchangeRateResponse);
         quote.setExpireTime(LocalDateTime.now().plusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         quote.setTargetAmount(targetAmount);
-//        quote.setUser(userService.getUserFromJwt(jwt));
-        quoteRepository.save(quote);
+        quote.setUser(jwtTokenProvider.getUserFromJwt(jwt));
+        Quote savedQuote = quoteRepository.save(quote);
 
         QuoteResponse response = new QuoteResponse();
         response.setResultCode(200);
         response.setResultMsg("OK");
-        response.setQuote(quote);
+        QuoteResponse.Quote quoteDTO = new QuoteResponse.Quote();
+        quoteDTO.setQuoteId(savedQuote.getQuoteId());
+        quoteDTO.setExchangeRate(savedQuote.getExchangeRate());
+        quoteDTO.setExpireTime(savedQuote.getExpireTime());
+        quoteDTO.setTargetAmount(savedQuote.getTargetAmount());
+        response.setQuote(quoteDTO);
 
         return response;
     }
@@ -75,7 +86,7 @@ public class TransferService {
             throw new QuoteExpiredException("Quote has expired");
         }
 
-        User user = userService.getUserFromJwt(jwt);
+        User user = jwtTokenProvider.getUserFromJwt(jwt);
         BigDecimal dailyTransferAmount = userService.getDailyTransferAmount(user);
         BigDecimal newDailyTotal = dailyTransferAmount.add(quote.getTargetAmount());
 

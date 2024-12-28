@@ -1,11 +1,21 @@
 package com.example.moinproject.domain.dto.transfer;
 
-import com.example.moinproject.domain.entity.Quote;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Data
 public class QuoteResponse {
     private int resultCode;
     private String resultMsg;
+
     private Quote quote;
+
+    @Data
+    public static class Quote {
+        private Long quoteId;
+        private BigDecimal exchangeRate;
+        private String expireTime;
+        private BigDecimal targetAmount;
+    }
 }
