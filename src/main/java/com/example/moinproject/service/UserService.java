@@ -3,18 +3,26 @@ package com.example.moinproject.service;
 import com.example.moinproject.config.exception.CustomAuthenticationException;
 import com.example.moinproject.domain.dto.user.SignUpRequest;
 import com.example.moinproject.domain.dto.user.UserDto;
+import com.example.moinproject.domain.entity.Quote;
 import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.UserRepository;
 import com.example.moinproject.util.EncryptionService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Transactional
@@ -25,6 +33,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EncryptionService encryptionService;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     public UserDto signup(SignUpRequest request) {
         validateSignUpRequest(request);
@@ -94,4 +105,36 @@ public class UserService {
         dto.setPhoneNumber(user.getPhoneNumber());
         return dto;
     }
+
+    public User getUserFromJwt(String jwt) {
+        try {
+            // JWT 토큰에서 Claims 추출
+            String tokenWithoutBearer = jwt.replace("Bearer ", "");
+
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(tokenWithoutBearer)
+                    .getBody();
+
+            // Claims에서 userId 추출
+            String userId = claims.getSubject();
+
+            // userId로 사용자 조회
+            return userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new CustomAuthenticationException("User not found"));
+        } catch (Exception e) {
+            throw new CustomAuthenticationException("Invalid JWT token");
+        }
+    }
+
+    public BigDecimal getDailyTransferAmount(User user) {
+        Optional<User> userId = userRepository.findByUserId(user.getUserId());
+        List<Quote> quotes = userId.get().getQuotes();
+        if (quotes.size() >= 2) {
+            Quote secondLastQuote = quotes.get(quotes.size() - 2);
+            return secondLastQuote.getTargetAmount();
+        }
+        return BigDecimal.valueOf(0);
+    }
+
 }

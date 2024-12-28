@@ -1,12 +1,16 @@
 package com.example.moinproject.service;
 
+import com.example.moinproject.config.exception.DailyLimitExceededException;
+import com.example.moinproject.config.exception.QuoteExpiredException;
+import com.example.moinproject.domain.dto.transfer.TransferRequest;
+import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.domain.entity.Quote;
 import com.example.moinproject.domain.dto.transfer.QuoteRequest;
 import com.example.moinproject.domain.dto.transfer.QuoteResponse;
+import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.repository.QuoteRepository;
 import com.example.moinproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,13 +19,17 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Currency;
+import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Service
 @RequiredArgsConstructor
-public class QuoteService {
+public class TransferService {
     private final ExchangeRateService exchangeRateService;
     private final QuoteRepository quoteRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
     public QuoteResponse createQuote(QuoteRequest request) {
         if (request.getAmount() <= 0) {
@@ -48,6 +56,7 @@ public class QuoteService {
         quote.setExchangeRate(exchangeRateResponse);
         quote.setExpireTime(LocalDateTime.now().plusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         quote.setTargetAmount(targetAmount);
+//        quote.setUser(userService.getUserFromJwt(jwt));
         quoteRepository.save(quote);
 
         QuoteResponse response = new QuoteResponse();
@@ -56,6 +65,40 @@ public class QuoteService {
         response.setQuote(quote);
 
         return response;
+    }
+
+    public TransferResponse processTransfer(TransferRequest request, String jwt) {
+        Quote quote = quoteRepository.findById(request.getQuoteId())
+                .orElseThrow(() -> new QuoteExpiredException("Quote not found"));
+
+        if (isQuoteExpired(quote)) {
+            throw new QuoteExpiredException("Quote has expired");
+        }
+
+        User user = userService.getUserFromJwt(jwt);
+        BigDecimal dailyTransferAmount = userService.getDailyTransferAmount(user);
+        BigDecimal newDailyTotal = dailyTransferAmount.add(quote.getTargetAmount());
+
+        if (user.getIdType().equals("REG_NO") && newDailyTotal.compareTo(new BigDecimal("1000")) > 0) {
+            throw new DailyLimitExceededException("Personal account daily limit exceeded");
+        }
+
+        if (user.getIdType().equals("BUSINESS_NO") && newDailyTotal.compareTo(new BigDecimal("5000")) > 0) {
+            throw new DailyLimitExceededException("Business account daily limit exceeded");
+        }
+
+        //TODO 여기에 실제 송금 처리 로직 구현
+
+        TransferResponse response = new TransferResponse();
+        response.setResultCode(200);
+        response.setResultMsg("OK");
+        return response;
+    }
+
+    private boolean isQuoteExpired(Quote quote) {
+        LocalDateTime expireTime = LocalDateTime.parse(quote.getExpireTime(),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return LocalDateTime.now().isAfter(expireTime);
     }
 
     public static BigDecimal calculateFee(String currency, BigDecimal amount) {
