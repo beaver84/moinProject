@@ -58,11 +58,12 @@ public class TransferService {
         int fractionDigits = targetCurrency.getDefaultFractionDigits();
         targetAmount = targetAmount.setScale(fractionDigits, RoundingMode.HALF_UP);
 
-        Quote quote = new Quote();
-        quote.setExchangeRate(exchangeRateResponse);
-        quote.setExpireTime(LocalDateTime.now().plusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        quote.setTargetAmount(targetAmount);
-        quote.setUser(jwtTokenProvider.getUserFromJwt(jwt));
+        Quote quote = Quote.builder()
+                .exchangeRate(exchangeRateResponse)
+                .expireTime(LocalDateTime.now().plusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .targetAmount(targetAmount)
+                .user(jwtTokenProvider.getUserFromJwt(jwt))
+                .build();
         Quote savedQuote = quoteRepository.save(quote);
 
         QuoteResponse response = new QuoteResponse();
@@ -98,7 +99,7 @@ public class TransferService {
             throw new DailyLimitExceededException("Business account daily limit exceeded");
         }
 
-        //TODO 여기에 실제 송금 처리 로직 구현
+        quote.setIsTransfered(true);
 
         TransferResponse response = new TransferResponse();
         response.setResultCode(200);
