@@ -1,8 +1,6 @@
 package com.example.moinproject.domain.entity;
 
-import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.domain.enums.Roles;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,6 +41,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quote> quotes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transfer> transfers = new ArrayList<>();
+
     @Column
     protected Roles accountRole;
 
@@ -55,6 +56,16 @@ public class User implements UserDetails {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.accountRole = Roles.USER;
+    }
+
+    public void addTransfer(Transfer transfer) {
+        transfers.add(transfer);
+        transfer.setUser(this);
+    }
+
+    public void removeTransfer(Transfer transfer) {
+        transfers.remove(transfer);
+        transfer.setUser(null);
     }
 
     public void addQuote(Quote quote) {

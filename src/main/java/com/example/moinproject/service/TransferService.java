@@ -3,13 +3,17 @@ package com.example.moinproject.service;
 import com.example.moinproject.config.JwtTokenProvider;
 import com.example.moinproject.config.exception.DailyLimitExceededException;
 import com.example.moinproject.config.exception.QuoteExpiredException;
+import com.example.moinproject.domain.dto.transfer.TransferHistoryItem;
+import com.example.moinproject.domain.dto.transfer.TransferHistoryResponse;
 import com.example.moinproject.domain.dto.transfer.TransferRequest;
 import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.domain.entity.Quote;
 import com.example.moinproject.domain.dto.transfer.QuoteRequest;
 import com.example.moinproject.domain.dto.transfer.QuoteResponse;
+import com.example.moinproject.domain.entity.Transfer;
 import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.repository.QuoteRepository;
+import com.example.moinproject.repository.TransferRepository;
 import com.example.moinproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Currency;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Transactional
@@ -34,6 +39,7 @@ public class TransferService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TransferRepository transferRepository;
 
     public QuoteResponse createQuote(QuoteRequest request, String jwt) {
         if (request.getAmount() <= 0) {
@@ -62,6 +68,10 @@ public class TransferService {
                 .exchangeRate(exchangeRateResponse)
                 .expireTime(LocalDateTime.now().plusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .targetAmount(targetAmount)
+                .amount(request.getAmount())
+                .fee(fee)
+                .targetCurrency(request.getTargetCurrency())
+                .usdExchangeRate(basePrice)
                 .user(jwtTokenProvider.getUserFromJwt(jwt))
                 .build();
         Quote savedQuote = quoteRepository.save(quote);
@@ -101,10 +111,72 @@ public class TransferService {
 
         quote.setIsTransfered(true);
 
+        Transfer transfer = Transfer.builder()
+                .sourceAmount(quote.getAmount())
+                .fee(quote.getFee())
+                .usdExchangeRate(quote.getUsdExchangeRate())
+                .usdAmount(quote.getAmount())
+                .targetCurrency(quote.getTargetCurrency())
+                .exchangeRate(quote.getExchangeRate())
+                .targetAmount(quote.getTargetAmount())
+                .requestedDate(LocalDateTime.now())
+                .user(user)
+                .build();
+        transferRepository.save(transfer);
+
         TransferResponse response = new TransferResponse();
         response.setResultCode(200);
         response.setResultMsg("OK");
         return response;
+    }
+
+    public TransferHistoryResponse getTransferHistory(String jwt) {
+        String userId = jwtTokenProvider.getUserFromJwt(jwt).getUserId();
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Transfer> transfers = transferRepository.findByUserOrderByRequestedDateDesc(user);
+
+        LocalDate today = LocalDate.now();
+        long todayTransferCount = transfers.stream()
+                .filter(t -> t.getRequestedDate().toLocalDate().isEqual(today))
+                .count();
+
+        double todayTransferUsdAmount = transfers.stream()
+                .filter(t -> t.getRequestedDate().toLocalDate().isEqual(today))
+                .mapToDouble(Transfer::getUsdAmount)
+                .sum();
+
+        List<TransferHistoryItem> history = transfers.stream()
+                .map(this::mapToTransferHistoryItem)
+                .collect(Collectors.toList());
+
+        return TransferHistoryResponse.builder()
+                .resultCode(200)
+                .resultMsg("OK")
+                .userId(user.getUserId())
+                .name(user.getName())
+                .todayTransferCount((int) todayTransferCount)
+                .todayTransferUsdAmount(roundToTwoDecimals(todayTransferUsdAmount))
+                .history(history)
+                .build();
+    }
+
+    private TransferHistoryItem mapToTransferHistoryItem(Transfer transfer) {
+        return TransferHistoryItem.builder()
+                .sourceAmount(transfer.getSourceAmount())
+                .fee(transfer.getFee())
+                .usdExchangeRate(transfer.getUsdExchangeRate())
+                .usdAmount(BigDecimal.valueOf(roundToTwoDecimals(transfer.getUsdAmount())))
+                .targetCurrency(transfer.getTargetCurrency())
+                .exchangeRate(transfer.getExchangeRate())
+                .targetAmount(transfer.getTargetAmount())
+                .requestedDate(transfer.getRequestedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .build();
+    }
+
+    private double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     private boolean isQuoteExpired(Quote quote) {

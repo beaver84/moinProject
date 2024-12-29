@@ -4,6 +4,7 @@ import com.example.moinproject.config.exception.DailyLimitExceededException;
 import com.example.moinproject.config.exception.QuoteExpiredException;
 import com.example.moinproject.domain.dto.transfer.QuoteRequest;
 import com.example.moinproject.domain.dto.transfer.QuoteResponse;
+import com.example.moinproject.domain.dto.transfer.TransferHistoryResponse;
 import com.example.moinproject.domain.dto.transfer.TransferRequest;
 import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.service.TransferService;
@@ -46,6 +47,13 @@ public class TransferController {
         } catch (Exception e) {
             return createErrorResponse("UNKNOWN_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<TransferHistoryResponse> getTransferHistory(@RequestHeader("Authorization") String token) {
+        String jwt = token.replace("Bearer ", "");
+        TransferHistoryResponse response = transferService.getTransferHistory(jwt);
+        return ResponseEntity.ok(response);
     }
 
     private ResponseEntity<TransferResponse> createErrorResponse(String errorMsg, HttpStatus status) {
