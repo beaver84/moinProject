@@ -2,10 +2,7 @@ package com.example.moinproject.controller;
 
 import com.example.moinproject.config.JwtTokenProvider;
 import com.example.moinproject.config.response.ErrorResponse;
-import com.example.moinproject.domain.dto.user.LoginRequest;
-import com.example.moinproject.domain.dto.user.LoginResponse;
-import com.example.moinproject.domain.dto.user.SignUpRequest;
-import com.example.moinproject.domain.dto.user.UserDto;
+import com.example.moinproject.domain.dto.user.*;
 import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.service.UserService;
 import jakarta.validation.Valid;
@@ -30,8 +27,13 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody @Valid SignUpRequest request) {
         try {
-            UserDto createdUser = userService.signup(request);
-            return ResponseEntity.ok(createdUser);
+            userService.signup(request);
+
+            SignUpResponse response = new SignUpResponse();
+            response.setResultCode(200);
+            response.setResultMsg("OK");
+
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

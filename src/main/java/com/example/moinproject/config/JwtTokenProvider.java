@@ -7,7 +7,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +61,6 @@ public class JwtTokenProvider {
 
     public User getUserFromJwt(String jwt) {
         try {
-            // JWT 토큰에서 Claims 추출
             String tokenWithoutBearer = jwt.replace("Bearer ", "");
 
             Claims claims = Jwts.parser()
@@ -70,10 +68,8 @@ public class JwtTokenProvider {
                     .parseClaimsJws(tokenWithoutBearer)
                     .getBody();
 
-            // Claims에서 userId 추출
             String userId = claims.get("id").toString();
 
-            // userId로 사용자 조회
             return userRepository.findByUserId(userId)
                     .orElseThrow(() -> new CustomAuthenticationException("User not found"));
         } catch (Exception e) {
