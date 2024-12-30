@@ -35,9 +35,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String phoneNumber;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quote> quotes = new ArrayList<>();
 
@@ -48,13 +45,12 @@ public class User implements UserDetails {
     protected Roles accountRole;
 
     @Builder
-    public User(String userId, String password, String idType, String idValue, String name, String phoneNumber) {
+    public User(String userId, String password, String idType, String idValue, String name) {
         this.userId = userId;
         this.password = password;
         this.idType = idType;
         this.idValue = idValue;
         this.name = name;
-        this.phoneNumber = phoneNumber;
         this.accountRole = Roles.USER;
     }
 

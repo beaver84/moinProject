@@ -8,10 +8,7 @@ import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.UserRepository;
 import com.example.moinproject.util.EncryptionService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.security.Key;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -34,11 +30,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EncryptionService encryptionService;
-
-    private Key key;
-
-    @Value("${jwt.secret}")
-    private String jwtSecret;
 
     public UserDto signup(SignUpRequest request) {
         validateSignUpRequest(request);
@@ -53,7 +44,7 @@ public class UserService {
                 .idType(String.valueOf(IdType.valueOf(String.valueOf(request.getIdType()))))
                 .idValue(encryptionService.encrypt(request.getIdValue()))
                 .name(request.getName())
-                .phoneNumber(request.getPhoneNumber()).build();
+                .build();
 
         User savedUser = userRepository.save(user);
         return convertToDto(savedUser);
@@ -105,7 +96,6 @@ public class UserService {
         dto.setUserId(user.getUserId());
         dto.setIdType(String.valueOf(user.getIdType()));
         dto.setName(user.getName());
-        dto.setPhoneNumber(user.getPhoneNumber());
         return dto;
     }
 

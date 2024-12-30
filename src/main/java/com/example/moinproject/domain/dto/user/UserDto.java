@@ -7,5 +7,4 @@ public class UserDto {
     private String userId;
     private String idType;
     private String name;
-    private String phoneNumber;
 }
