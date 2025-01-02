@@ -1,8 +1,6 @@
 package com.example.moinproject.config.exception;
 
-import org.springframework.security.core.AuthenticationException;
-
-public class CustomAuthenticationException extends AuthenticationException {
+public class CustomAuthenticationException extends BaseCustomException {
     public CustomAuthenticationException(String msg) {
         super(msg);
     }

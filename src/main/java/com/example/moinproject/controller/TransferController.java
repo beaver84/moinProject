@@ -1,5 +1,6 @@
 package com.example.moinproject.controller;
 
+import com.example.moinproject.config.exception.BaseCustomException;
 import com.example.moinproject.config.exception.DailyLimitExceededException;
 import com.example.moinproject.config.exception.QuoteExpiredException;
 import com.example.moinproject.domain.dto.transfer.QuoteRequest;
@@ -9,10 +10,12 @@ import com.example.moinproject.domain.dto.transfer.TransferRequest;
 import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.service.TransferService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/transfer")
@@ -38,12 +41,15 @@ public class TransferController {
         try {
             TransferResponse response = transferService.processTransfer(request, jwt);
             return ResponseEntity.ok(response);
-        } catch (QuoteExpiredException e) {
-            return createErrorResponse("QUOTE_EXPIRED", HttpStatus.BAD_REQUEST);
-        } catch (DailyLimitExceededException e) {
-            return createErrorResponse("LIMIT_EXCESS", HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return createErrorResponse("UNKNOWN_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (BaseCustomException e) {
+            log.error("An error occurred: " + e.getMessage());
+            if (e instanceof DailyLimitExceededException) {
+                return createErrorResponse("QUOTE_EXPIRED", HttpStatus.BAD_REQUEST);
+            } else if (e instanceof QuoteExpiredException) {
+                return createErrorResponse("LIMIT_EXCESS", HttpStatus.BAD_REQUEST);
+            } else {
+                return createErrorResponse("UNKNOWN_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
