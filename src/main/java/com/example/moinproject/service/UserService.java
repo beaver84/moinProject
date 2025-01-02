@@ -33,7 +33,7 @@ public class UserService {
         validateSignUpRequest(request);
 
         if (userRepository.existsByUserId(request.getUserId())) {
-            throw new IllegalArgumentException("User already exists with this email");
+            throw new IllegalArgumentException("해당 유저가 이미 존재합니다.");
         }
 
         User user = User.builder()
@@ -50,10 +50,10 @@ public class UserService {
 
     public User authenticateUser(String userId, String password) throws AuthenticationException {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomAuthenticationException("User not found"));
+                .orElseThrow(() -> new CustomAuthenticationException("유저가 존재하지 않습니다."));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new CustomAuthenticationException("Invalid password");
+            throw new CustomAuthenticationException("암호가 올바르지 않습니다.");
         }
 
         return user;
@@ -61,16 +61,16 @@ public class UserService {
 
     private void validateSignUpRequest(SignUpRequest request) {
         if (!isValidEmail(request.getUserId())) {
-            throw new IllegalArgumentException("Invalid email format");
+            throw new IllegalArgumentException("이메일 형식이 아닙니다.");
         }
         if (!Arrays.asList("REG_NO", "BUSINESS_NO").contains(request.getIdType())) {
-            throw new IllegalArgumentException("Invalid idType");
+            throw new IllegalArgumentException("ID 타입이 올바르지 않습니다.");
         }
         if (request.getIdType().equals("REG_NO") && !isValidRegNo(request.getIdValue())) {
-            throw new IllegalArgumentException("Invalid registration number");
+            throw new IllegalArgumentException("주민등록번호가 올바르지 않습니다.");
         }
         if (request.getIdType().equals("BUSINESS_NO") && !isValidBusinessNo(request.getIdValue())) {
-            throw new IllegalArgumentException("Invalid business number");
+            throw new IllegalArgumentException("사업자등록번호가 올바르지 않습니다.");
         }
     }
 
@@ -100,13 +100,10 @@ public class UserService {
 
 
     public BigDecimal getDailyTransferAmount(User user) {
-        Optional<User> userId = userRepository.findByUserId(user.getUserId());
-        List<Quote> quotes = userId.get().getQuotes();
-        if (quotes.size() >= 2) {
-            Quote secondLastQuote = quotes.get(quotes.size() - 2);
-            return secondLastQuote.getTargetAmount();
-        }
-        return BigDecimal.valueOf(0);
+        return userRepository.findByUserId(user.getUserId())
+            .map(u -> u.getQuotes().stream()
+            .map(Quote::getTargetAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add))
+            .orElse(BigDecimal.ZERO);
     }
-
 }

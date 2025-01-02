@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +48,13 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(User user) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+
         JwtBuilder builder = Jwts.builder()
                 .setSubject(user.getUserId())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .setHeader(createHeader())
                 .setClaims(createUserClaims(user))
                 .signWith(SignatureAlgorithm.HS256, createSigningKey());
