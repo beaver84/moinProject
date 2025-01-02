@@ -8,6 +8,7 @@ import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.domain.dto.user.SignUpRequest;
 import com.example.moinproject.domain.entity.Quote;
 import com.example.moinproject.domain.entity.User;
+import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.QuoteRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class TransferServiceTest {
         SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setUserId("sample@gmail.com");
         signUpRequest.setPassword("Qq09iu!@1238798");
-        signUpRequest.setIdType("REG_NO");
+        signUpRequest.setIdType(IdType.REG_NO);
         signUpRequest.setIdValue("001123-3111111");
         signUpRequest.setName("테스트");
         userService.signup(signUpRequest);
@@ -63,7 +64,7 @@ class TransferServiceTest {
         SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setUserId("sample@gmail.com");
         signUpRequest.setPassword("Qq09iu!@1238798");
-        signUpRequest.setIdType("REG_NO");
+        signUpRequest.setIdType(IdType.REG_NO);
         signUpRequest.setIdValue("001123-3111111");
         signUpRequest.setName("테스트");
         userService.signup(signUpRequest);

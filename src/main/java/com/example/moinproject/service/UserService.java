@@ -16,9 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static com.example.moinproject.domain.enums.IdType.BUSINESS_NO;
+import static com.example.moinproject.domain.enums.IdType.REG_NO;
 
 @Transactional
 @Service
@@ -39,7 +40,7 @@ public class UserService {
         User user = User.builder()
                 .userId(request.getUserId())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .idType(String.valueOf(IdType.valueOf(String.valueOf(request.getIdType()))))
+                .idType(request.getIdType())
                 .idValue(encryptionService.encrypt(request.getIdValue()))
                 .name(request.getName())
                 .build();
@@ -63,13 +64,13 @@ public class UserService {
         if (!isValidEmail(request.getUserId())) {
             throw new IllegalArgumentException("이메일 형식이 아닙니다.");
         }
-        if (!Arrays.asList("REG_NO", "BUSINESS_NO").contains(request.getIdType())) {
+        if (!Arrays.asList(REG_NO, BUSINESS_NO).contains(request.getIdType())) {
             throw new IllegalArgumentException("ID 타입이 올바르지 않습니다.");
         }
-        if (request.getIdType().equals("REG_NO") && !isValidRegNo(request.getIdValue())) {
+        if (request.getIdType().equals(REG_NO) && !isValidRegNo(request.getIdValue())) {
             throw new IllegalArgumentException("주민등록번호가 올바르지 않습니다.");
         }
-        if (request.getIdType().equals("BUSINESS_NO") && !isValidBusinessNo(request.getIdValue())) {
+        if (request.getIdType().equals(IdType.BUSINESS_NO) && !isValidBusinessNo(request.getIdValue())) {
             throw new IllegalArgumentException("사업자등록번호가 올바르지 않습니다.");
         }
     }

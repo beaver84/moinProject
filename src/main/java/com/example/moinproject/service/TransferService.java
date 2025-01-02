@@ -12,6 +12,7 @@ import com.example.moinproject.domain.dto.transfer.QuoteRequest;
 import com.example.moinproject.domain.dto.transfer.QuoteResponse;
 import com.example.moinproject.domain.entity.Transfer;
 import com.example.moinproject.domain.entity.User;
+import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.repository.QuoteRepository;
 import com.example.moinproject.repository.TransferRepository;
 import com.example.moinproject.repository.UserRepository;
@@ -111,11 +112,11 @@ public class TransferService {
         BigDecimal dailyTransferAmount = userService.getDailyTransferAmount(user);
         BigDecimal newDailyTotal = dailyTransferAmount.add(quote.getTargetAmount());
 
-        if (user.getIdType().equals("REG_NO") && newDailyTotal.compareTo(new BigDecimal("1000")) > 0) {
+        if (user.getIdType().equals(IdType.REG_NO) && newDailyTotal.compareTo(new BigDecimal("1000")) > 0) {
             throw new DailyLimitExceededException("개인 회원 한도가 초과되었습니다.");
         }
 
-        if (user.getIdType().equals("BUSINESS_NO") && newDailyTotal.compareTo(new BigDecimal("5000")) > 0) {
+        if (user.getIdType().equals(IdType.BUSINESS_NO) && newDailyTotal.compareTo(new BigDecimal("5000")) > 0) {
             throw new DailyLimitExceededException("기업 회원 한도가 초과되었습니다.");
         }
 

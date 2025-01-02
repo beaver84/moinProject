@@ -1,5 +1,6 @@
 package com.example.moinproject.domain.entity;
 
+import com.example.moinproject.domain.enums.IdType;
 import com.example.moinproject.domain.enums.Roles;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +28,7 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false)
-    private String idType;
+    private IdType idType;
 
     @Column(nullable = false)
     private String idValue;
@@ -35,17 +36,17 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Quote> quotes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Transfer> transfers = new ArrayList<>();
 
     @Column
     protected Roles accountRole;
 
     @Builder
-    public User(String userId, String password, String idType, String idValue, String name) {
+    public User(String userId, String password, IdType idType, String idValue, String name) {
         this.userId = userId;
         this.password = password;
         this.idType = idType;
