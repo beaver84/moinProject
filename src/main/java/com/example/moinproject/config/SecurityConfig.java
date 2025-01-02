@@ -17,19 +17,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/user/**").permitAll()
-                        .requestMatchers("/transfer/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.disable())
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+            .authorizeHttpRequests((authz) -> authz
+                    .requestMatchers("/h2-console/**").permitAll()
+                    .requestMatchers("/api/user/**").permitAll()
+                    .requestMatchers("/transfer/**").permitAll()
+                    .anyRequest().authenticated()
+            )
+            .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers
+                    .frameOptions(frameOptions -> frameOptions.disable())
+            )
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
         return http.build();
     }
 

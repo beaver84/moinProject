@@ -2,7 +2,6 @@ package com.example.moinproject.domain.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -13,7 +12,7 @@ public class SignUpRequest {
     @NotBlank(message = "비밀번호는 필수입니다")
     private String password;
 
-    @NotNull(message = "ID 타입은 필수입니다")
+    @NotBlank(message = "ID 타입은 필수입니다")
     private String idType;
 
     @NotBlank(message = "ID 값은 필수입니다")

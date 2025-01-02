@@ -8,6 +8,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.xml.bind.DatatypeConverter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,15 +24,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
-
-    public JwtTokenProvider(ObjectMapper objectMapper, UserRepository userRepository) {
-        this.objectMapper = objectMapper;
-        this.userRepository = userRepository;
-    }
 
     @Value("${jwt.expiration:1800000}")
     private long jwtExpiration;

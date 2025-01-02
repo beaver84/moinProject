@@ -8,18 +8,16 @@ import com.example.moinproject.domain.dto.transfer.TransferHistoryResponse;
 import com.example.moinproject.domain.dto.transfer.TransferRequest;
 import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.service.TransferService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/transfer")
 public class TransferController {
     private final TransferService transferService;
-
-    public TransferController(TransferService transferService) {
-        this.transferService = transferService;
-    }
 
     @PostMapping("/quote")
     public ResponseEntity<QuoteResponse> getQuote(@RequestBody QuoteRequest request, @RequestHeader("Authorization") String jwt) {

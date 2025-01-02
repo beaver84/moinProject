@@ -6,13 +6,9 @@ import com.example.moinproject.domain.dto.transfer.QuoteResponse;
 import com.example.moinproject.domain.dto.transfer.TransferRequest;
 import com.example.moinproject.domain.dto.transfer.TransferResponse;
 import com.example.moinproject.domain.dto.user.SignUpRequest;
-import com.example.moinproject.domain.dto.user.UserDto;
 import com.example.moinproject.domain.entity.Quote;
 import com.example.moinproject.domain.entity.User;
 import com.example.moinproject.repository.QuoteRepository;
-import com.example.moinproject.repository.TransferRepository;
-import com.example.moinproject.repository.UserRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,17 +25,11 @@ import static org.assertj.core.api.Assertions.*;
 class TransferServiceTest {
 
     @Autowired
-    private ExchangeRateService exchangeRateService;
-    @Autowired
     private QuoteRepository quoteRepository;
     @Autowired
     private UserService userService;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private JwtTokenProvider jwtTokenProvider;
-    @Autowired
-    private TransferRepository transferRepository;
     @Autowired
     private TransferService transferService;
 
