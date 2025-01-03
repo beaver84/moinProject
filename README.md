@@ -1,5 +1,5 @@
 
-회고: 
+     회고: 
 
      사용자 증가로 최대 쓰레드 개수만큼 큐가 가득찬다고 가정하면 redis 캐시를 활용하면 시스템의 가용성과 응답시간을 개선할 수 있을 것 같습니다(@EnableCaching, @Cacheable).
 
@@ -12,13 +12,13 @@
      공통 예외 추상 클래스(BaseCustomException.class)을 상속하여 일관된 구조를 가지게 하였습니다(여러 예외를 한번에 처리 가능, 새로운 커스텀 예외를 추가할 때 이를 상속받아 쉽게 구현 가능) 
      다만, 글로벌 예외 핸들러(@ExceptionHandler)를 구현하여 일관된 오류 응답(로그 등)을 처리할 수 있을것 같습니다.
      
-     로그에는 p6spy로 SQL 쿼리만 보이도록 하였지만 추후 Log4j2 또는 logback 등으로 파일로 저장하면 좋겠습니다.
+     로그에는 p6spy로 SQL 쿼리만 보이도록 하였지만 추후 Log4j2 또는 logback 등으로 적절히 커스텀하고 파일로도 저장할 수 있으면 좋겠습니다.
 
-- 구현 내용
+- 구현 내용(사용자 API, 송금 API) -> (아래 번호 순서대로 실행 요망)
 
 - 사용자 API
 
-- 회원가입
+1. 회원가입
 엔드포인트: POST /api/user/signup
 설명: 새로운 사용자 등록
 요청 본문: SignUpRequest (userId, password, idType, idValue, name)
@@ -33,7 +33,7 @@
 비밀번호는 암호화하여 저장합니다.
 ID 값은 암호화하여 저장합니다.
 
-- 로그인
+2. 로그인
 엔드포인트: POST /api/user/login
 설명: 사용자 인증 및 JWT 토큰 생성
 요청 본문: LoginRequest (userId, password)
@@ -46,7 +46,7 @@ ID 값은 암호화하여 저장합니다.
 
 - 송금 API
 
-견적 받기
+3. 견적 받기
 엔드포인트: POST /transfer/quote
 설명: 송금을 위한 견적 생성
 헤더: Authorization (JWT 토큰)
@@ -59,7 +59,7 @@ ID 값은 암호화하여 저장합니다.
 송금 요청에 대한 견적을 생성합니다.
 JWT 토큰을 통해 사용자 인증을 수행합니다.
 
-- 송금 요청
+4. 송금 요청
 엔드포인트: POST /transfer/request
 설명: 송금 요청 처리
 헤더: Authorization (JWT 토큰)
@@ -75,7 +75,7 @@ JWT 토큰을 통해 사용자 인증을 수행합니다.
 JWT 토큰을 통해 사용자 인증을 수행합니다.
 일일 한도 초과 및 견적 만료 등의 예외 상황을 처리합니다.
 
-- 송금 내역 조회
+5. 송금 내역 조회
 엔드포인트: GET /transfer/list
 설명: 사용자의 송금 내역 조회
 헤더: Authorization (JWT 토큰)
