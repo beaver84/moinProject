@@ -1,8 +1,18 @@
-회고: validator 추가 및 더 세분화된 예외 클래스를 만들어서 예외 처리 개선 필요
-, access token 등 토큰 갱신 매커니즘 활용, 암호화 알고리즘 코드 개선 등으로 보안을 강화 필요
-, 동시 접속자 증가할 경우 redis 캐시를 mongoDB 활용으로 저장 속도, 데이터 신뢰도 강화 필요
-, 주고 받는 구조가 더 복잡해질 경우 상황에 맞게 Kafka 또는 rabbitMQ를 활용하여 대용량 데이터 처리 개선 필요
-, 시간상 성공 및 실패 테스트 코드를 많이 작성 못해서 아쉬웠음
+
+회고: 
+
+     사용자 증가로 최대 쓰레드 개수만큼 큐가 가득찬다고 가정하면 redis 캐시를 활용하면 시스템의 가용성과 응답시간을 개선할 수 있을 것 같습니다(@EnableCaching, @Cacheable).
+
+     시간상 validator는 1건(IdTypeValidator) 및 테스트 코드는 2건(successCreateQuote, successProcessTransfer) 을 작성하였지만 더 추가되면 좋을 것 같습니다. 
+
+     또한, Spring Security를 간단히 구현하였지만 추후에는 Access token 등 토큰 갱신 매커니즘 활용, https 활용, 암호화 알고리즘 코드 개선 등으로 보안을 강화 필요성이 있습니다.
+
+     다른 시스템과 주고 받는 구조가 더 복잡해질 경우 상황에 맞게 Kafka 또는 rabbitMQ를 적용하여 적절히 대용량 데이터를 대비할 필요성이 있어 보입니다(배치나 메시지 서비스 등)
+     
+     공통 예외 추상 클래스(BaseCustomException.class)을 상속하여 일관된 구조를 가지게 하였습니다(여러 예외를 한번에 처리 가능, 새로운 커스텀 예외를 추가할 때 이를 상속받아 쉽게 구현 가능) 
+     다만, 글로벌 예외 핸들러(@ExceptionHandler)를 구현하여 일관된 오류 응답(로그 등)을 처리할 수 있을것 같습니다.
+     
+     로그에는 p6spy로 SQL 쿼리만 보이도록 하였지만 추후 Log4j2 또는 logback 등으로 파일로 저장하면 좋겠습니다.
 
 - 구현 내용
 
@@ -84,4 +94,4 @@ Spring Boot
 Spring Security
 JWT (인증용)
 Lombok
-
+p6spy (로그)
